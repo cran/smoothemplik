@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+
+<html>
+
+<head>
+
+<meta charset="utf-8" />
+<meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
+
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+
+<meta name="author" content="Andreï V. Kostyrka, University of Luxembourg" />
+
+
+<title>Choosing weights for empirical likelihood smoothing</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+code{white-space: pre-wrap;}
+span.smallcaps{font-variant: small-caps;}
+span.underline{text-decoration: underline;}
+div.column{display: inline-block; vertical-align: top; width: 50%;}
+div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+ul.task-list{list-style: none;}
+</style>
+
+
+
+<style type="text/css">
+code {
+white-space: pre;
+}
+.sourceCode {
+overflow: visible;
+}
+</style>
+<style type="text/css" data-origin="pandoc">
+html { -webkit-text-size-adjust: 100%; }
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+.sourceCode { overflow: visible; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+{ counter-reset: source-line 0; }
+pre.numberSource code > span
+{ position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+{ content: counter(source-line);
+position: relative; left: -1em; text-align: right; vertical-align: baseline;
+border: none; display: inline-block;
+-webkit-touch-callout: none; -webkit-user-select: none;
+-khtml-user-select: none; -moz-user-select: none;
+-ms-user-select: none; user-select: none;
+padding: 0 4px; width: 4em;
+color: #aaaaaa;
+}
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa; padding-left: 4px; }
+div.sourceCode
+{ }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } 
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.at { color: #7d9029; } 
+code span.bn { color: #40a070; } 
+code span.bu { color: #008000; } 
+code span.cf { color: #007020; font-weight: bold; } 
+code span.ch { color: #4070a0; } 
+code span.cn { color: #880000; } 
+code span.co { color: #60a0b0; font-style: italic; } 
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.do { color: #ba2121; font-style: italic; } 
+code span.dt { color: #902000; } 
+code span.dv { color: #40a070; } 
+code span.er { color: #ff0000; font-weight: bold; } 
+code span.ex { } 
+code span.fl { color: #40a070; } 
+code span.fu { color: #06287e; } 
+code span.im { color: #008000; font-weight: bold; } 
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } 
+code span.kw { color: #007020; font-weight: bold; } 
+code span.op { color: #666666; } 
+code span.ot { color: #007020; } 
+code span.pp { color: #bc7a00; } 
+code span.sc { color: #4070a0; } 
+code span.ss { color: #bb6688; } 
+code span.st { color: #4070a0; } 
+code span.va { color: #19177c; } 
+code span.vs { color: #4070a0; } 
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } 
+</style>
+<script>
+// apply pandoc div.sourceCode style to pre.sourceCode instead
+(function() {
+  var sheets = document.styleSheets;
+  for (var i = 0; i < sheets.length; i++) {
+    if (sheets[i].ownerNode.dataset["origin"] !== "pandoc") continue;
+    try { var rules = sheets[i].cssRules; } catch (e) { continue; }
+    var j = 0;
+    while (j < rules.length) {
+      var rule = rules[j];
+      // check if there is a div.sourceCode rule
+      if (rule.type !== rule.STYLE_RULE || rule.selectorText !== "div.sourceCode") {
+        j++;
+        continue;
+      }
+      var style = rule.style.cssText;
+      // check if color or background-color is set
+      if (rule.style.color === '' && rule.style.backgroundColor === '') {
+        j++;
+        continue;
+      }
+      // replace div.sourceCode by a pre.sourceCode rule
+      sheets[i].deleteRule(j);
+      sheets[i].insertRule('pre.sourceCode{' + style + '}', j);
+    }
+  }
+})();
+</script>
+
+<style type="text/css">
+p.abstract{
+text-align: center;
+font-weight: bold;
+}
+div.abstract{
+margin: auto;
+width: 90%;
+}
+</style>
+
+
+<style type="text/css">
+
+div.csl-bib-body { }
+div.csl-entry {
+clear: both;
+}
+.hanging div.csl-entry {
+margin-left:2em;
+text-indent:-2em;
+}
+div.csl-left-margin {
+min-width:2em;
+float:left;
+}
+div.csl-right-inline {
+margin-left:2em;
+padding-left:1em;
+}
+div.csl-indent {
+margin-left: 2em;
+}
+</style>
+
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
+
+
+
+
+</head>
+
+<body>
+
+
+
+
+<h1 class="title toc-ignore">Choosing weights for empirical likelihood
+smoothing</h1>
+<h4 class="author">Andreï V. Kostyrka, University of Luxembourg</h4>
+<h4 class="date">Created: 2025-04-29, last modified: 2024-04-29,
+compiled: 2025-07-19</h4>
+<div class="abstract">
+<p class="abstract">Abstract</p>
+This vignette demonstrates how the choice of SEL weights for smoothing
+the empirical likelihood affects the final result.
+</div>
+
+
+<div id="TOC">
+<ul>
+<li><a href="#kernel-methods" id="toc-kernel-methods"><span class="toc-section-number">1</span> Kernel methods</a></li>
+<li><a href="#conclusion" id="toc-conclusion"><span class="toc-section-number">2</span> Conclusion</a></li>
+<li><a href="#references" id="toc-references"><span class="toc-section-number">3</span> References</a></li>
+</ul>
+</div>
+
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(smoothemplik)</span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; Smoothed Empirical Likelihood estimation version 0.0.14 (2025-04-30).</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; This is *NOT* a stable version. Core functions subject to change.</span></span>
+<span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
+<span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>quiet <span class="ot">&lt;-</span> <span class="cf">function</span>(expr) {  <span class="co"># Suppressing all output</span></span>
+<span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">sink</span>(<span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">&quot;windows&quot;</span>) <span class="st">&quot;NUL&quot;</span> <span class="cf">else</span> <span class="st">&quot;/dev/null&quot;</span>)</span>
+<span id="cb1-7"><a href="#cb1-7" tabindex="-1"></a>  ret <span class="ot">&lt;-</span> expr</span>
+<span id="cb1-8"><a href="#cb1-8" tabindex="-1"></a>  <span class="fu">sink</span>()</span>
+<span id="cb1-9"><a href="#cb1-9" tabindex="-1"></a>  <span class="fu">return</span>(ret)</span>
+<span id="cb1-10"><a href="#cb1-10" tabindex="-1"></a>}</span></code></pre></div>
+<div id="kernel-methods" class="section level2" number="1">
+<h2><span class="header-section-number">1</span> Kernel methods</h2>
+<p>There are many approaches to choosing the smoothing weights for
+conditional empirical likelihood, and there is no consensus on the
+optimality of one or another weighting scheme.</p>
+<p>Recall that in the SEL approach, the empirical likelihood of the data
+in the observed sample is maximised subject to the constraint <span class="math inline">\(\mathbb{E}(\rho(Z, \theta) \mid X) = 0\)</span>.
+Assume for simplicity that the dimension of the moment function <span class="math inline">\(\rho\)</span> is 1. The optimisation problem is
+therefore finding the optimal discrete distribution that enforces a
+sample analogue of this conditional moment restriction for any parameter
+<span class="math inline">\(\theta\)</span>: <span class="math display">\[
+\max_{0 &lt; p_{ij} &lt; 1} \sum_{i=1}^n \sum_{j=1}^n w_{ij} \log
+p_{ij},
+\]</span> where <span class="math inline">\(\sum_j p_{ij} = 1\)</span>
+for <span class="math inline">\(i=1,\ldots,n\)</span> and <span class="math inline">\(\sum_j p_{ij}\rho(Z_j, \theta) = 0\)</span> for
+<span class="math inline">\(i=1,\ldots,n\)</span>.</p>
+<p>The solution to this problem has a closed form: <span class="math display">\[
+\hat p_{ij} = \frac{w_{ij}}{1 + \hat\lambda_i (\theta) \rho(Z_j,
+\theta)},
+\]</span> where the Lagrange multipliers <span class="math inline">\(\hat\lambda_i\)</span> are the solution to the
+equality <span class="math inline">\(\sum_{j=1}^n \frac{w_{ij} \rho(Z_j,
+\theta)}{1 + \lambda_i(\theta) \rho(Z_j, \theta)} = 0\)</span> (the
+first-order condition for maximising the weighted empirical likelihood),
+found numerically.</p>
+<p>Typically, <span class="math inline">\(w_{ij}\)</span> are kernel
+weights. They can be obtained in a plethora of approaches:</p>
+<ol style="list-style-type: decimal">
+<li>Directly apply popular kernels to the conditioning variables <span class="math inline">\(X\)</span>;</li>
+<li>Transform <span class="math inline">\(X\)</span> coordinate-wise via
+any probability-integral-like transformation (empirical CDF, Gaussian
+CDF etc.) to map them into the <span class="math inline">\([0, 1]^{\dim
+X}\)</span> hyper-cubel;</li>
+<li>For each <span class="math inline">\(X\)</span>, find its <span class="math inline">\(k\)</span> nearest neighbours, rank them by
+proximity, and apply the kernel function to the ranks of the nearest
+observations.</li>
+<li>Choose the adaptive bandwidth <span class="math inline">\(b_n(X_i) =
+b_i\)</span> such that there be exactly <span class="math inline">\(k\)</span> nearest neighbours in the vicinity
+defined by the kernel, without any rank transformation.</li>
+</ol>
+<p>Theoretically, approach (4) should work the best because it ensures
+that there are enough observations for smoothing, and that there is
+neither over- or under-smoothing. The latter two phenomena are a
+problem:</p>
+<ul>
+<li>If the SEL bandwidth is too large, then, identification is lost
+because the conditional moment restriction becomes an unconditional one
+(‘the average residual is zero’), and the model parameters cannot be
+estimated.</li>
+<li>If SEL bandwidth is too narrow, then, there is not enough smoothing
+of the likelihood; since the log-empirical-likelihood ratio is unbounded
+from below, the values of the SELR statistic can become arbitrarily
+small. In addition, too small a bandwidth limits the parameter space
+severely because for the SELR statistic to be finite, there must be at
+least one pair of opposite-sign residuals. This is known as the spanning
+condition, which means that the convex hull of the data must contain the
+zero,.</li>
+</ul>
+<p>Consider kernel weights of the form <span class="math display">\[
+w_{ij} := k\left( \frac{X_i - X_j}{b} \right),
+\]</span> where <span class="math inline">\(k\)</span> is a kernel
+function that is zero outside <span class="math inline">\([-1,
+1]\)</span>, integrates to one, and is symmetric and non-negative within
+that interval. The most popular kernel functions are uniform, triangular
+(Bartlett), quadratic (Epanechnikov), quartic, and Gaussian.</p>
+<div id="fixed-bandwidth" class="section level3" number="1.1">
+<h3><span class="header-section-number">1.1</span> Fixed bandwidth</h3>
+<p>Using a fixed bandwidth for SEL smoothing is the simplest choice, yet
+it can be sub-optimal for many reasons. In the regions where the
+observations are dense, the empirical likelihood may be over-smoothed,
+whereas in low-density regions, it may be undersmoothed, creating
+problems for the spanning condition.</p>
+<p>The obvious ‘crutch’ to fix the spanning condition failure is the use
+of some sort of extrapolation of the SELR function outside the convex
+hull. The present package offers three options for the
+<code>weightedEL0()</code> function: <code>chull.fail = &quot;taylor&quot;</code>
+that extrapolates its branches halfway after the penultimate observation
+at each side, or <code>chull.fail = &quot;wald&quot;</code> that replaces the SELR
+function halfway between the outermost observations with a smooth
+transition to a Wald approximation, or <code>chull.fail = &quot;none&quot;</code>
+for returning <code>-Inf</code>.</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a>x  <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="sc">-</span><span class="dv">3</span>, <span class="sc">-</span><span class="dv">2</span>, <span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">4</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>ct <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">1</span>)</span>
+<span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>grid.full <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">3.5</span>, <span class="fl">5.5</span>, <span class="fl">0.05</span>)</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>grid.keep <span class="ot">&lt;-</span> grid.full <span class="sc">&lt;</span> <span class="sc">-</span><span class="fl">2.25</span> <span class="sc">|</span> grid.full <span class="sc">&gt;</span> <span class="fl">3.25</span></span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>selr0 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;none&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>selr1 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;taylor&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>selr2 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;wald&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">plot</span>(grid.full, selr0, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">120</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.5</span>, <span class="fl">4.5</span>), <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
+<span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;-2 * weighted log-EL&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;&quot;</span>)</span>
+<span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">points</span>(grid.full[grid.keep], selr1[grid.keep], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">0</span>)</span>
+<span id="cb2-11"><a href="#cb2-11" tabindex="-1"></a>wm <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>(x, ct)</span>
+<span id="cb2-12"><a href="#cb2-12" tabindex="-1"></a>wv <span class="ot">&lt;-</span> <span class="fu">weighted.mean</span>((x <span class="sc">-</span> wm)<span class="sc">^</span><span class="dv">2</span>, ct) <span class="sc">/</span> <span class="fu">sum</span>(ct)</span>
+<span id="cb2-13"><a href="#cb2-13" tabindex="-1"></a><span class="fu">points</span>(grid.full[grid.keep], selr2[grid.keep], <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">2</span>)</span>
+<span id="cb2-14"><a href="#cb2-14" tabindex="-1"></a><span class="fu">lines</span>(grid.full, (grid.full <span class="sc">-</span> wm)<span class="sc">^</span><span class="dv">2</span> <span class="sc">/</span> wv, <span class="at">col =</span> <span class="dv">2</span>, <span class="at">pch =</span> <span class="dv">2</span>)</span>
+<span id="cb2-15"><a href="#cb2-15" tabindex="-1"></a><span class="fu">rug</span>(x, <span class="at">lwd =</span> <span class="dv">2</span>)</span>
+<span id="cb2-16"><a href="#cb2-16" tabindex="-1"></a><span class="fu">abline</span>(<span class="at">v =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">2.5</span>, <span class="fl">3.5</span>), <span class="at">lty =</span> <span class="dv">3</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<p>These extrapolations may certainly remedy the predicament of having
+negative infinity for the log-ELR statistic, which does not get accepted
+by most numerical optimisers – but they should not be relied upon. It is
+normal to have ‘bad’ values for ‘bad’ guesses during the optimisation
+process, but at the initial value and at the optimum, the spanning
+condition should hold.</p>
+</div>
+<div id="nearest-neigbour-weights" class="section level3" number="1.2">
+<h3><span class="header-section-number">1.2</span> Nearest-neigbour
+weights</h3>
+</div>
+<div id="adaptive-weights" class="section level3" number="1.3">
+<h3><span class="header-section-number">1.3</span> Adaptive weights</h3>
+<p>Define a function that chooses such a bandwidth that there be
+<code>ceiling(d/n)</code> nearest neighbours for each observation. It is
+assumed that the kernel in question is zero outside <span class="math inline">\([-1, 1]\)</span>.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" tabindex="-1"></a>pickMinBW <span class="ot">&lt;-</span> <span class="cf">function</span>(X, <span class="at">d =</span> <span class="dv">2</span> <span class="sc">/</span> <span class="fu">sqrt</span>(<span class="fu">length</span>(X))) {</span>
+<span id="cb3-2"><a href="#cb3-2" tabindex="-1"></a>  n <span class="ot">&lt;-</span> <span class="fu">length</span>(X)</span>
+<span id="cb3-3"><a href="#cb3-3" tabindex="-1"></a>  nd <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(d<span class="sc">*</span>n)</span>
+<span id="cb3-4"><a href="#cb3-4" tabindex="-1"></a>  b <span class="ot">&lt;-</span> <span class="fu">numeric</span>(n)</span>
+<span id="cb3-5"><a href="#cb3-5" tabindex="-1"></a>  gaps <span class="ot">&lt;-</span> <span class="fu">pmin</span>(<span class="fu">c</span>(<span class="cn">NA</span>, <span class="fu">diff</span>(X)), <span class="fu">c</span>(<span class="fu">diff</span>(X), <span class="cn">NA</span>))</span>
+<span id="cb3-6"><a href="#cb3-6" tabindex="-1"></a>  gaps[<span class="dv">1</span>] <span class="ot">&lt;-</span> X[<span class="dv">2</span>] <span class="sc">-</span> X[<span class="dv">1</span>]</span>
+<span id="cb3-7"><a href="#cb3-7" tabindex="-1"></a>  gaps[n] <span class="ot">&lt;-</span> X[n] <span class="sc">-</span> X[n<span class="dv">-1</span>]</span>
+<span id="cb3-8"><a href="#cb3-8" tabindex="-1"></a>  <span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span>n) {</span>
+<span id="cb3-9"><a href="#cb3-9" tabindex="-1"></a>    bw.start <span class="ot">&lt;-</span> gaps[i] <span class="sc">*</span> <span class="dv">2</span></span>
+<span id="cb3-10"><a href="#cb3-10" tabindex="-1"></a>    obs.neigh <span class="ot">&lt;-</span> <span class="cf">function</span>(bw) <span class="fu">sum</span>(<span class="fu">abs</span>(X[i] <span class="sc">-</span> X) <span class="sc">&lt;</span> bw) <span class="sc">-</span> <span class="dv">1</span></span>
+<span id="cb3-11"><a href="#cb3-11" tabindex="-1"></a>    b[i] <span class="ot">&lt;-</span> <span class="fu">uniroot</span>(<span class="cf">function</span>(bw) <span class="fu">obs.neigh</span>(bw) <span class="sc">-</span> nd, <span class="fu">c</span>(bw.start<span class="sc">/</span><span class="dv">2</span>, bw.start<span class="sc">/</span><span class="fl">1.5</span>), <span class="at">extendInt =</span> <span class="st">&quot;upX&quot;</span>)<span class="sc">$</span>root</span>
+<span id="cb3-12"><a href="#cb3-12" tabindex="-1"></a>  }</span>
+<span id="cb3-13"><a href="#cb3-13" tabindex="-1"></a>  b</span>
+<span id="cb3-14"><a href="#cb3-14" tabindex="-1"></a>}</span></code></pre></div>
+</div>
+<div id="simulation" class="section level3" number="1.4">
+<h3><span class="header-section-number">1.4</span> Simulation</h3>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>n <span class="ot">&lt;-</span> <span class="dv">50</span></span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a><span class="fu">set.seed</span>(<span class="dv">1</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>X <span class="ot">&lt;-</span> <span class="fu">sort</span>(<span class="fu">rchisq</span>(n, <span class="at">df =</span> <span class="dv">3</span>))</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> X <span class="sc">+</span> (<span class="fu">rchisq</span>(n, <span class="at">df =</span> <span class="dv">3</span>) <span class="sc">-</span> <span class="dv">3</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> X)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>mod0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X)</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>vhat0 <span class="ot">&lt;-</span> <span class="fu">kernelSmooth</span>(X, mod0<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>, <span class="at">bw =</span> <span class="fu">max</span>(<span class="fu">diff</span>(X))<span class="sc">*</span><span class="fl">1.2</span>, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; No duplicates found in input &#39;x&#39; and &#39;xout&#39;. Consider setting no.dedup = TRUE to eliminate the overhead.</span></span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X, <span class="at">weights =</span> <span class="dv">1</span> <span class="sc">/</span> vhat0)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">OLS =</span> mod0<span class="sc">$</span>coefficients, <span class="at">WOLS =</span> mod1<span class="sc">$</span>coefficients)</span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;                   OLS      WOLS</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; (Intercept) 2.0887343 1.4469218</span></span>
+<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; X           0.2858387 0.5054064</span></span></code></pre></div>
+<p>These values are far away from truth.</p>
+<p>Define four smoothing matrices:</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>bw0 <span class="ot">&lt;-</span> <span class="fu">bw.CV</span>(X, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb5-2"><a href="#cb5-2" tabindex="-1"></a>bw0 <span class="ot">&lt;-</span> <span class="fu">max</span>(bw0, <span class="fu">max</span>(<span class="fu">diff</span>(X))<span class="sc">*</span><span class="fl">1.1</span>)</span>
+<span id="cb5-3"><a href="#cb5-3" tabindex="-1"></a>wF <span class="ot">&lt;-</span> <span class="fu">kernelWeights</span>(X, <span class="at">bw =</span> bw0, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb5-4"><a href="#cb5-4" tabindex="-1"></a></span>
+<span id="cb5-5"><a href="#cb5-5" tabindex="-1"></a><span class="co"># Assuming Gaussian CDF, which is not true</span></span>
+<span id="cb5-6"><a href="#cb5-6" tabindex="-1"></a>Xs <span class="ot">&lt;-</span> <span class="fu">scale</span>(X)</span>
+<span id="cb5-7"><a href="#cb5-7" tabindex="-1"></a>XP <span class="ot">&lt;-</span> <span class="fu">pnorm</span>(Xs)</span>
+<span id="cb5-8"><a href="#cb5-8" tabindex="-1"></a>wP <span class="ot">&lt;-</span> <span class="fu">kernelWeights</span>(XP, <span class="at">bw =</span> <span class="fu">bw.CV</span>(XP), <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb5-9"><a href="#cb5-9" tabindex="-1"></a><span class="fu">rowMeans</span>(wP <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>n</span>
+<span id="cb5-10"><a href="#cb5-10" tabindex="-1"></a><span class="co">#&gt;  [1] 0.14 0.16 0.20 0.24 0.26 0.28 0.28 0.28 0.26 0.26 0.28 0.28 0.28 0.28 0.30</span></span>
+<span id="cb5-11"><a href="#cb5-11" tabindex="-1"></a><span class="co">#&gt; [16] 0.26 0.24 0.24 0.22 0.22 0.22 0.22 0.22 0.18 0.16 0.14 0.10 0.04 0.06 0.06</span></span>
+<span id="cb5-12"><a href="#cb5-12" tabindex="-1"></a><span class="co">#&gt; [31] 0.08 0.12 0.14 0.12 0.16 0.18 0.22 0.22 0.18 0.18 0.16 0.14 0.16 0.22 0.14</span></span>
+<span id="cb5-13"><a href="#cb5-13" tabindex="-1"></a><span class="co">#&gt; [46] 0.12 0.12 0.12 0.12 0.10</span></span>
+<span id="cb5-14"><a href="#cb5-14" tabindex="-1"></a></span>
+<span id="cb5-15"><a href="#cb5-15" tabindex="-1"></a>bw.adapt <span class="ot">&lt;-</span> <span class="fu">pickMinBW</span>(X, <span class="at">d =</span> <span class="fl">0.15</span>)</span>
+<span id="cb5-16"><a href="#cb5-16" tabindex="-1"></a><span class="fu">plot</span>(X, bw.adapt, <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>, <span class="at">main =</span> <span class="st">&quot;Adaptive bandwidth ensuring 15% non-zero weights&quot;</span>)</span></code></pre></div>
+<p><img role="img" src="data:image/png;base64,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" /><!-- --></p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" tabindex="-1"></a>wA <span class="ot">&lt;-</span> <span class="fu">kernelWeights</span>(X, <span class="at">bw =</span> bw.adapt, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb6-2"><a href="#cb6-2" tabindex="-1"></a><span class="fu">rowMeans</span>(wA <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>n</span>
+<span id="cb6-3"><a href="#cb6-3" tabindex="-1"></a><span class="co">#&gt;  [1] 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-4"><a href="#cb6-4" tabindex="-1"></a><span class="co">#&gt; [16] 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a><span class="co">#&gt; [31] 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-6"><a href="#cb6-6" tabindex="-1"></a><span class="co">#&gt; [46] 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-7"><a href="#cb6-7" tabindex="-1"></a></span>
+<span id="cb6-8"><a href="#cb6-8" tabindex="-1"></a>rX <span class="ot">&lt;-</span> <span class="fu">rank</span>(X)</span>
+<span id="cb6-9"><a href="#cb6-9" tabindex="-1"></a>wNN <span class="ot">&lt;-</span> <span class="fu">kernelWeights</span>(rX<span class="sc">/</span><span class="fu">max</span>(rX), <span class="at">bw =</span> <span class="fl">0.09</span>, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
+<span id="cb6-10"><a href="#cb6-10" tabindex="-1"></a><span class="fu">rowMeans</span>(wNN <span class="sc">&gt;</span> <span class="dv">0</span>) <span class="sc">-</span> <span class="dv">1</span><span class="sc">/</span>n</span>
+<span id="cb6-11"><a href="#cb6-11" tabindex="-1"></a><span class="co">#&gt;  [1] 0.08 0.10 0.12 0.14 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-12"><a href="#cb6-12" tabindex="-1"></a><span class="co">#&gt; [16] 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-13"><a href="#cb6-13" tabindex="-1"></a><span class="co">#&gt; [31] 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16 0.16</span></span>
+<span id="cb6-14"><a href="#cb6-14" tabindex="-1"></a><span class="co">#&gt; [46] 0.16 0.14 0.12 0.10 0.08</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>g  <span class="ot">&lt;-</span> <span class="cf">function</span>(theta, ...) Y <span class="sc">-</span> theta[<span class="dv">1</span>] <span class="sc">-</span> theta[<span class="dv">2</span>]<span class="sc">*</span>X</span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a></span>
+<span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>wF <span class="ot">&lt;-</span> wF <span class="sc">/</span> <span class="fu">rowSums</span>(wF)</span>
+<span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a>wP <span class="ot">&lt;-</span> wP <span class="sc">/</span> <span class="fu">rowSums</span>(wP)</span>
+<span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a>wNN <span class="ot">&lt;-</span> wNN <span class="sc">/</span> <span class="fu">rowSums</span>(wNN)</span>
+<span id="cb7-6"><a href="#cb7-6" tabindex="-1"></a>wA <span class="ot">&lt;-</span> wA <span class="sc">/</span> <span class="fu">rowSums</span>(wA)</span>
+<span id="cb7-7"><a href="#cb7-7" tabindex="-1"></a></span>
+<span id="cb7-8"><a href="#cb7-8" tabindex="-1"></a>g1 <span class="ot">&lt;-</span> <span class="cf">function</span>(theta) <span class="fu">smoothEmplik</span>(<span class="at">rho =</span> g, <span class="at">theta =</span> theta, <span class="at">data =</span> <span class="cn">NULL</span>, <span class="at">sel.weights =</span> wF, <span class="at">minus =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-9"><a href="#cb7-9" tabindex="-1"></a>g2 <span class="ot">&lt;-</span> <span class="cf">function</span>(theta) <span class="fu">smoothEmplik</span>(<span class="at">rho =</span> g, <span class="at">theta =</span> theta, <span class="at">data =</span> <span class="cn">NULL</span>, <span class="at">sel.weights =</span> wP, <span class="at">minus =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-10"><a href="#cb7-10" tabindex="-1"></a>g3 <span class="ot">&lt;-</span> <span class="cf">function</span>(theta) <span class="fu">smoothEmplik</span>(<span class="at">rho =</span> g, <span class="at">theta =</span> theta, <span class="at">data =</span> <span class="cn">NULL</span>, <span class="at">sel.weights =</span> wNN, <span class="at">minus =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-11"><a href="#cb7-11" tabindex="-1"></a>g4 <span class="ot">&lt;-</span> <span class="cf">function</span>(theta) <span class="fu">smoothEmplik</span>(<span class="at">rho =</span> g, <span class="at">theta =</span> theta, <span class="at">data =</span> <span class="cn">NULL</span>, <span class="at">sel.weights =</span> wA, <span class="at">minus =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb7-12"><a href="#cb7-12" tabindex="-1"></a>  </span>
+<span id="cb7-13"><a href="#cb7-13" tabindex="-1"></a>th1  <span class="ot">&lt;-</span> <span class="fu">optim</span>(mod1<span class="sc">$</span>coefficients, g1, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">ndeps =</span> <span class="fu">rep</span>(<span class="fl">1e-5</span>, <span class="dv">2</span>)))</span>
+<span id="cb7-14"><a href="#cb7-14" tabindex="-1"></a>th2  <span class="ot">&lt;-</span> <span class="fu">optim</span>(mod1<span class="sc">$</span>coefficients, g2, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">ndeps =</span> <span class="fu">rep</span>(<span class="fl">1e-5</span>, <span class="dv">2</span>)))</span>
+<span id="cb7-15"><a href="#cb7-15" tabindex="-1"></a>th3  <span class="ot">&lt;-</span> <span class="fu">optim</span>(mod1<span class="sc">$</span>coefficients, g3, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">ndeps =</span> <span class="fu">rep</span>(<span class="fl">1e-5</span>, <span class="dv">2</span>)))</span>
+<span id="cb7-16"><a href="#cb7-16" tabindex="-1"></a>th4  <span class="ot">&lt;-</span> <span class="fu">optim</span>(mod1<span class="sc">$</span>coefficients, g4, <span class="at">method =</span> <span class="st">&quot;BFGS&quot;</span>, <span class="at">control =</span> <span class="fu">list</span>(<span class="at">ndeps =</span> <span class="fu">rep</span>(<span class="fl">1e-5</span>, <span class="dv">2</span>)))</span>
+<span id="cb7-17"><a href="#cb7-17" tabindex="-1"></a></span>
+<span id="cb7-18"><a href="#cb7-18" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">WOLS =</span> mod1<span class="sc">$</span>coefficients, <span class="at">Fixed =</span> th1<span class="sc">$</span>par, <span class="at">PIT =</span> th2<span class="sc">$</span>par, <span class="at">NNeighb =</span> th3<span class="sc">$</span>par, <span class="at">Adapt =</span> th4<span class="sc">$</span>par)</span>
+<span id="cb7-19"><a href="#cb7-19" tabindex="-1"></a><span class="co">#&gt;                  WOLS     Fixed       PIT   NNeighb     Adapt</span></span>
+<span id="cb7-20"><a href="#cb7-20" tabindex="-1"></a><span class="co">#&gt; (Intercept) 1.4469218 1.5904202 1.2621380 1.9742547 1.4927759</span></span>
+<span id="cb7-21"><a href="#cb7-21" tabindex="-1"></a><span class="co">#&gt; X           0.5054064 0.5006559 0.6819781 0.2018379 0.4187147</span></span></code></pre></div>
+</div>
+</div>
+<div id="conclusion" class="section level2" number="2">
+<h2><span class="header-section-number">2</span> Conclusion</h2>
+<p>This simulation emphasises the importance of careful bandwidth choice
+in efficient estimation via smoothing the empirical likelihood.
+Nearest-neighbour methods work well, whereas adaptive-bandwidth methods
+are comparable to them, but also possess lucrative theoretical proofs
+such as integrability.</p>
+</div>
+<div id="references" class="section level2" number="3">
+<h2><span class="header-section-number">3</span> References</h2>
+<div id="refs">
+
+</div>
+</div>
+
+
+
+<!-- code folding -->
+
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
