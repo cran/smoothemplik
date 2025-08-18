@@ -27,9 +27,9 @@ x  <- c(-3, -2, 2, 3, 4)
 ct <- c(10, 4:1)
 grid.full <- seq(-3.5, 5.5, 0.05)
 grid.keep <- grid.full < -2.25 | grid.full > 3.25
-selr0 <- sapply(grid.full, function(m) -2*weightedEL0(x, ct, mu = m, chull.fail = "none")$logelr)
-selr1 <- sapply(grid.full, function(m) -2*weightedEL0(x, ct, mu = m, chull.fail = "taylor")$logelr)
-selr2 <- sapply(grid.full, function(m) -2*weightedEL0(x, ct, mu = m, chull.fail = "wald")$logelr)
+selr0 <- sapply(grid.full, function(m) -2*EL0(x, ct, mu = m, chull.fail = "none")$logelr)
+selr1 <- sapply(grid.full, function(m) -2*EL0(x, ct, mu = m, chull.fail = "taylor")$logelr)
+selr2 <- sapply(grid.full, function(m) -2*EL0(x, ct, mu = m, chull.fail = "wald")$logelr)
 plot(grid.full, selr0, ylim = c(0, 120), xlim = c(-3.5, 4.5), bty = "n",
      main = "-2 * weighted log-EL", ylab = "")
 points(grid.full[grid.keep], selr1[grid.keep], col = 4, pch = 0)

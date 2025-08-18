@@ -374,7 +374,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 smoothing</h1>
 <h4 class="author">Andreï V. Kostyrka, University of Luxembourg</h4>
 <h4 class="date">Created: 2025-04-29, last modified: 2024-04-29,
-compiled: 2025-07-19</h4>
+compiled: 2025-08-18</h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
 This vignette demonstrates how the choice of SEL weights for smoothing
@@ -391,8 +391,8 @@ the empirical likelihood affects the final result.
 </div>
 
 <div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" tabindex="-1"></a><span class="fu">library</span>(smoothemplik)</span>
-<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; Smoothed Empirical Likelihood estimation version 0.0.14 (2025-04-30).</span></span>
-<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; This is *NOT* a stable version. Core functions subject to change.</span></span>
+<span id="cb1-2"><a href="#cb1-2" tabindex="-1"></a><span class="co">#&gt; Smoothed Empirical Likelihood version 0.0.15 (2025-08-05).</span></span>
+<span id="cb1-3"><a href="#cb1-3" tabindex="-1"></a><span class="co">#&gt; Package under active development; core functions subject to change.</span></span>
 <span id="cb1-4"><a href="#cb1-4" tabindex="-1"></a></span>
 <span id="cb1-5"><a href="#cb1-5" tabindex="-1"></a>quiet <span class="ot">&lt;-</span> <span class="cf">function</span>(expr) {  <span class="co"># Suppressing all output</span></span>
 <span id="cb1-6"><a href="#cb1-6" tabindex="-1"></a>  <span class="fu">sink</span>(<span class="cf">if</span> (.Platform<span class="sc">$</span>OS.type <span class="sc">==</span> <span class="st">&quot;windows&quot;</span>) <span class="st">&quot;NUL&quot;</span> <span class="cf">else</span> <span class="st">&quot;/dev/null&quot;</span>)</span>
@@ -474,9 +474,9 @@ problems for the spanning condition.</p>
 <p>The obvious ‘crutch’ to fix the spanning condition failure is the use
 of some sort of extrapolation of the SELR function outside the convex
 hull. The present package offers three options for the
-<code>weightedEL0()</code> function: <code>chull.fail = &quot;taylor&quot;</code>
-that extrapolates its branches halfway after the penultimate observation
-at each side, or <code>chull.fail = &quot;wald&quot;</code> that replaces the SELR
+<code>EL0()</code> function: <code>chull.fail = &quot;taylor&quot;</code> that
+extrapolates its branches halfway after the penultimate observation at
+each side, or <code>chull.fail = &quot;wald&quot;</code> that replaces the SELR
 function halfway between the outermost observations with a smooth
 transition to a Wald approximation, or <code>chull.fail = &quot;none&quot;</code>
 for returning <code>-Inf</code>.</p>
@@ -484,9 +484,9 @@ for returning <code>-Inf</code>.</p>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a>ct <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">10</span>, <span class="dv">4</span><span class="sc">:</span><span class="dv">1</span>)</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a>grid.full <span class="ot">&lt;-</span> <span class="fu">seq</span>(<span class="sc">-</span><span class="fl">3.5</span>, <span class="fl">5.5</span>, <span class="fl">0.05</span>)</span>
 <span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>grid.keep <span class="ot">&lt;-</span> grid.full <span class="sc">&lt;</span> <span class="sc">-</span><span class="fl">2.25</span> <span class="sc">|</span> grid.full <span class="sc">&gt;</span> <span class="fl">3.25</span></span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>selr0 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;none&quot;</span>)<span class="sc">$</span>logelr)</span>
-<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>selr1 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;taylor&quot;</span>)<span class="sc">$</span>logelr)</span>
-<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>selr2 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">weightedEL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;wald&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>selr0 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">EL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;none&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a>selr1 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">EL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;taylor&quot;</span>)<span class="sc">$</span>logelr)</span>
+<span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>selr2 <span class="ot">&lt;-</span> <span class="fu">sapply</span>(grid.full, <span class="cf">function</span>(m) <span class="sc">-</span><span class="dv">2</span><span class="sc">*</span><span class="fu">EL0</span>(x, ct, <span class="at">mu =</span> m, <span class="at">chull.fail =</span> <span class="st">&quot;wald&quot;</span>)<span class="sc">$</span>logelr)</span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a><span class="fu">plot</span>(grid.full, selr0, <span class="at">ylim =</span> <span class="fu">c</span>(<span class="dv">0</span>, <span class="dv">120</span>), <span class="at">xlim =</span> <span class="fu">c</span>(<span class="sc">-</span><span class="fl">3.5</span>, <span class="fl">4.5</span>), <span class="at">bty =</span> <span class="st">&quot;n&quot;</span>,</span>
 <span id="cb2-9"><a href="#cb2-9" tabindex="-1"></a>     <span class="at">main =</span> <span class="st">&quot;-2 * weighted log-EL&quot;</span>, <span class="at">ylab =</span> <span class="st">&quot;&quot;</span>)</span>
 <span id="cb2-10"><a href="#cb2-10" tabindex="-1"></a><span class="fu">points</span>(grid.full[grid.keep], selr1[grid.keep], <span class="at">col =</span> <span class="dv">4</span>, <span class="at">pch =</span> <span class="dv">0</span>)</span>
@@ -536,12 +536,11 @@ assumed that the kernel in question is zero outside <span class="math inline">\(
 <span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>Y <span class="ot">&lt;-</span> <span class="dv">1</span> <span class="sc">+</span> X <span class="sc">+</span> (<span class="fu">rchisq</span>(n, <span class="at">df =</span> <span class="dv">3</span>) <span class="sc">-</span> <span class="dv">3</span>) <span class="sc">*</span> (<span class="dv">1</span> <span class="sc">+</span> X)</span>
 <span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>mod0 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X)</span>
 <span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>vhat0 <span class="ot">&lt;-</span> <span class="fu">kernelSmooth</span>(X, mod0<span class="sc">$</span>residuals<span class="sc">^</span><span class="dv">2</span>, <span class="at">bw =</span> <span class="fu">max</span>(<span class="fu">diff</span>(X))<span class="sc">*</span><span class="fl">1.2</span>, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>
-<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a><span class="co">#&gt; No duplicates found in input &#39;x&#39; and &#39;xout&#39;. Consider setting no.dedup = TRUE to eliminate the overhead.</span></span>
-<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X, <span class="at">weights =</span> <span class="dv">1</span> <span class="sc">/</span> vhat0)</span>
-<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">OLS =</span> mod0<span class="sc">$</span>coefficients, <span class="at">WOLS =</span> mod1<span class="sc">$</span>coefficients)</span>
-<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt;                   OLS      WOLS</span></span>
-<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; (Intercept) 2.0887343 1.4469218</span></span>
-<span id="cb4-12"><a href="#cb4-12" tabindex="-1"></a><span class="co">#&gt; X           0.2858387 0.5054064</span></span></code></pre></div>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>mod1 <span class="ot">&lt;-</span> <span class="fu">lm</span>(Y <span class="sc">~</span> X, <span class="at">weights =</span> <span class="dv">1</span> <span class="sc">/</span> vhat0)</span>
+<span id="cb4-8"><a href="#cb4-8" tabindex="-1"></a><span class="fu">cbind</span>(<span class="at">OLS =</span> mod0<span class="sc">$</span>coefficients, <span class="at">WOLS =</span> mod1<span class="sc">$</span>coefficients)</span>
+<span id="cb4-9"><a href="#cb4-9" tabindex="-1"></a><span class="co">#&gt;                   OLS      WOLS</span></span>
+<span id="cb4-10"><a href="#cb4-10" tabindex="-1"></a><span class="co">#&gt; (Intercept) 2.0887343 1.4469218</span></span>
+<span id="cb4-11"><a href="#cb4-11" tabindex="-1"></a><span class="co">#&gt; X           0.2858387 0.5054064</span></span></code></pre></div>
 <p>These values are far away from truth.</p>
 <p>Define four smoothing matrices:</p>
 <div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" tabindex="-1"></a>bw0 <span class="ot">&lt;-</span> <span class="fu">bw.CV</span>(X, <span class="at">kernel =</span> <span class="st">&quot;epanechnikov&quot;</span>)</span>

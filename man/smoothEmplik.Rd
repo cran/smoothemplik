@@ -43,7 +43,7 @@ for convex hull failure.}
 \item{kernel.args}{A list of arguments passed to \code{kernelWeights()} if
 \code{sel.weights} is a function.}
 
-\item{EL.args}{A list of arguments passed to \code{weightedEL()}, \code{weightedEL0()}, or \code{weightedEuL}.}
+\item{EL.args}{A list of arguments passed to \code{EL()}, \code{EL0()}, or \code{EuL()}.}
 
 \item{minus}{If TRUE, returns SEL times -1 (for optimisation via minimisation).}
 
@@ -71,7 +71,7 @@ otherwise, attaches certain attributes for diagnostics:
 \code{"lam"} for the Lagrange multipliers lambda in the EL problems,
 \code{"nabla"} for d/d(lambda)EL (should be close to zero because this must be true for any \code{theta}),
 \code{"converged"} for the convergence of #' individual EL problems,
-\code{"exitcode"} for the \code{weightedEL} exit codes (0 for success),
+\code{"exitcode"} for the \code{EL} exit codes (0 for success),
 \code{"probabilities"} for the matrix of weights (very large, not recommended for sample sizes larger than 2000).}
 
 \item{...}{Passed to \code{rho}.}

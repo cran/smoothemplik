@@ -2,10 +2,7 @@
 
 These bug fixes and features are scheduled for the upcoming releases.
 
-- BUG: `bw.CV(x, y = y, kernel = "quartic", order = 4)` and `bw.CV(x, y = y, kernel = "quartic")`
 - BUG: Fix the DCV code with convolutions (especially the quartic one)
-- BUG: The check `CV = "DCV"` and `is.null(y)` seems redundant.
-- BUG: If `x` contains duplicates, `DCV(x, bw = bw.grid, weights = w)` complains that no duplicates were found (see the example)
 - BUG: LOO estimation: instead of dropping unique (X, Y) observations, leave each conditioning points (only X)
 - BUG: Fix the optimiser control argument in `bw.CV()`, add `log()` for non-negativity and better scaling.
 - SYNTAX: `kernelSmooth()`, being a local average, should have `na.rm` and check the inputs
@@ -20,13 +17,11 @@ These bug fixes and features are scheduled for the upcoming releases.
 - FEATURE: De-duplicate at kernel weights already (via `.prepareKernel()`), return the attribute
 - FEATURE: For `.prepareKernel()` AND mixed kernel: check if the max. column-wise gap between observations is >= than the bandwidth, otherwise write an informative message
 - FEATURE: Make DCV either sparse or memsave, not both; reflect the changes in `bw.CV()`
-- FEATURE: Speed up the computation of `kernelWeights` when `x = xgrid` by exploiting the symmetry of kernels.
 - FEATURE: Remove parallelisation over workers via setThreadOptions when there is outer parallelisation in `.kernelMixed()`
 - FEATURE: Move the de-duplication of the xout grid inside `kernelSmooth`
 - FEATURE: Create a default value for `memsave` and when to invoke it (based on `nx*ng`)
 - FEATURE: Add weight support to `kernelDiscreteDensitySmooth()`
 - FEATURE: Eliminate matrices in smoothing completely, try only parallel loops
-- FEATURE: Extend the CV to non-Gaussian cases.
 - FEATURE: CV: implement leave-K-out CV for speed
 - FEATURE: In `kernelMixedSmooth()`: if LOO, do not de-duplicate `xout`, copy it from `arg$x` (currently mitigated via `deduplicate.xout = FALSE`)
 - FEATURE: All LOO to the C++ density function
@@ -46,13 +41,15 @@ These bug fixes and features are scheduled for the upcoming releases.
 - DEV: Add tests reproducing simple hard-coded examples
 - DEV: Check the release with `todor::todor_package()`, `lintr::lint_package()`, `R CMD check --as-cran`, and `goodpractice::gp()`
 
-# smoothemplik 0.0.15 (2025-XX-XX)
+# smoothemplik 0.0.16 (2025-08-05)
+
+# smoothemplik 0.0.15 (2025-08-05)
 
 - Rewrote most of the internal functions in Rcpp for higher speed
-- Moved `weightedEL` to `weightedEL0` and `cemplik` -- now that it is in C++ -- to `weightedEL`
-- Added weighted Euclidean likelihood
+- Moved `weightedEL` to `EL0` and `cemplik` -- now that it is in C++ -- to `EL`
+- Added Euclidean likelihood, `EuL()`
 - `smoothEmplik()` accepts `attach.attributes = TRUE` as a synonym for `"all"`
-- Fixed a bug in the Taylor expansion that could cause a violation of the spanning condition
+- Fixed 2 bugs in the Taylor expansion related to the spanning condition
 
 # smoothemplik 0.0.14 (2025-04-30)
 

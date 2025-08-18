@@ -1,7 +1,7 @@
 Package: smoothemplik
 Type: Package
 Title: Smoothed Empirical Likelihood
-Version: 0.0.14
+Version: 0.0.15
 Authors@R: person(given=c("Andreï", "Victorovitch"), family="Kostyrka",
         role=c("aut", "cre"), email="andrei.kostyrka@gmail.com")
 Maintainer: Andreï Victorovitch Kostyrka <andrei.kostyrka@gmail.com>
@@ -27,7 +27,7 @@ LinkingTo: Rcpp, RcppArmadillo, RcppParallel, testthat
 SystemRequirements: GNU make
 VignetteBuilder: knitr
 Config/testthat/edition: 3
-Packaged: 2025-07-19 16:59:38 UTC; avk
+Packaged: 2025-08-18 07:48:21 UTC; avk
 Author: Andreï Victorovitch Kostyrka [aut, cre]
 Repository: CRAN
-Date/Publication: 2025-07-22 10:20:02 UTC
+Date/Publication: 2025-08-18 15:00:02 UTC

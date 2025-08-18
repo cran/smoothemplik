@@ -11,7 +11,7 @@
 #'   for convex hull failure.
 #' @param sel.weights Either a matrix with valid kernel smoothing weights with rows adding up to 1,
 #'   or a function that computes the kernel weights based on the \code{data} argument passed to \code{...}.
-#' @param EL.args A list of arguments passed to \code{weightedEL()}, \code{weightedEL0()}, or \code{weightedEuL}.
+#' @param EL.args A list of arguments passed to \code{EL()}, \code{EL0()}, or \code{EuL()}.
 #' @param kernel.args A list of arguments passed to \code{kernelWeights()} if
 #'   \code{sel.weights} is a function.
 #' @param minus If TRUE, returns SEL times -1 (for optimisation via minimisation).
@@ -33,7 +33,7 @@
 #' \code{"lam"} for the Lagrange multipliers lambda in the EL problems,
 #' \code{"nabla"} for d/d(lambda)EL (should be close to zero because this must be true for any \code{theta}),
 #' \code{"converged"} for the convergence of #' individual EL problems,
-#' \code{"exitcode"} for the \code{weightedEL} exit codes (0 for success),
+#' \code{"exitcode"} for the \code{EL} exit codes (0 for success),
 #' \code{"probabilities"} for the matrix of weights (very large, not recommended for sample sizes larger than 2000).
 #' @param ... Passed to \code{rho}.
 #'
@@ -175,13 +175,13 @@ smoothEmplik <- function(rho, theta, data, sel.weights = NULL,
 
   calcOne <- function(i) { # Call the appropriate weighted likelihood function based on `type`
     if (type == "EL") {
-      return(weightedEL(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
+      return(EL(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
                         weight.tolerance = EL.args$weight.tolerance, return.weights = attach.probs))
     } else if (type == "EuL") {
-      return(weightedEuL(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
+      return(EuL(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
                          weight.tolerance = EL.args$weight.tolerance, return.weights = attach.probs))
     } else if (type == "EL0") {
-      return(weightedEL0(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
+      return(EL0(z = rho.series, ct = w[i, ], mu = 0, SEL = TRUE,
                          chull.fail = EL.args$chull.fail, weight.tolerance = EL.args$weight.tolerance,
                          return.weights = attach.probs))
     } else {
