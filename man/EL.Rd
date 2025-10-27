@@ -2,135 +2,89 @@
 % Please edit documentation in R/elfunctions.R
 \name{EL}
 \alias{EL}
-\title{Self-concordant multi-variate empirical likelihood with counts}
-\source{
-This original code was written for \insertCite{owen2013self}{smoothemplik}
-and [published online](https://artowen.su.domains/empirical/) by Art B. Owen
-(March 2015, February 2017). The present version was rewritten in \code{Rcpp} and
-slightly reworked to contain fewer inner functions and loops.
-}
+\title{Unified empirical likelihood wrapper}
 \usage{
 EL(
   z,
-  mu = NULL,
   ct = NULL,
-  lambda.init = NULL,
-  SEL = FALSE,
+  mu = NULL,
+  shift = NULL,
+  type = c("auto", "EL1", "EL0", "EuL"),
+  chull.fail = c("none", "taylor", "wald", "adjusted", "adjusted2", "balanced"),
+  renormalise = FALSE,
   return.weights = FALSE,
-  lower = NULL,
-  upper = NULL,
-  order = 4L,
   weight.tolerance = NULL,
-  thresh = 1e-16,
-  itermax = 100L,
   verbose = FALSE,
-  alpha = 0.3,
-  beta = 0.8,
-  backeps = 0
+  ...
 )
 }
 \arguments{
 \item{z}{A numeric vector or a matrix with one data vector per column.}
 
-\item{mu}{Hypothesised mean, default (0 ... 0) in R^ncol(z)}
+\item{ct}{Numeric count variable with non-negative values that indicates the multiplicity of observations.}
 
-\item{ct}{A numeric vector of non-negative counts.}
+\item{mu}{Hypothesised mean, default \code{(0 ... 0)} in \eqn{R^{\mathrm{ncol}(z)}}{R^ncol(z)}.}
 
-\item{lambda.init}{Starting lambda, default (0 ... 0)}
+\item{shift}{The value to add in the denominator (useful in case there are extra
+Lagrange multipliers): \eqn{1 + \lambda'Z + shift}{1 + lambda'Z + shift}.}
 
-\item{SEL}{If \code{FALSE}, the default weight tolerance is \code{MachEps^(1/3)}, otherwise
-it is \code{MachEps^(1/2)} of the maximum count.}
+\item{type}{Character: one of \code{c("auto", "EL1", "EL0", "EuL")}. If \code{"auto"},
+uses \code{"EL1"} for multi-variate data and \code{"EL0"} for uni-variate.}
 
-\item{return.weights}{Logical: if \code{TRUE}, returns the empirical probabilities. Default is memory-saving (\code{FALSE}).}
+\item{chull.fail}{Character: \code{"none"} calls the original EL (which may return
+\code{-Inf} in case of a convex-hull violation), \code{"taylor"} calls [ExEL1()],
+\code{"wald"} calls [ExEL2()], \code{"adjusted"} adds one pseudo-observation as in
+\insertCite{chen2008adjusted}{smoothemplik}, \code{"adjusted2"} adds one (in 1D) or
+two (2D+) pseudo-observations with improved coverage rate according to
+\insertCite{liu2010adjusted}{smoothemplik}, and \code{"balanced"} adds two
+pseudo-observations according to \insertCite{emerson2009calibration}{smoothemplik}.}
 
-\item{lower}{Lower cut-off for [logTaylor()], default \code{1/nrow(z)}}
+\item{renormalise}{If \code{FALSE}, then uses the total sum of counts as the number of observations,
+like in vanilla empirical likelihood, due to formula (2.9) in \insertCite{owen2001empirical}{smoothemplik},
+otherwise re-normalises the counts to 1 according to \insertCite{cosma2019inference}{smoothemplik}
+(p. 170, the topmost formula).}
 
-\item{upper}{Upper cutoff for [logTaylor()], default \code{Inf}}
+\item{return.weights}{Logical: if \code{TRUE}, returns the empirical probabilities.
+Default is memory-saving (\code{FALSE}).}
 
-\item{order}{Positive integer such that the Taylor approximation of this order to log(x) is self-concordant; usually 4 or higher. Passed to [logTaylor()].}
-
-\item{weight.tolerance}{Weight tolerance for counts to improve numerical stability}
-
-\item{thresh}{Convergence threshold for log-likelihood (the default is aggressive)}
-
-\item{itermax}{Upper bound on number of Newton steps (seems ample)}
+\item{weight.tolerance}{Weight tolerance for counts to improve numerical stability
+(defaults to \code{sqrt(.Machine$double.eps)} times the maximum weight).}
 
 \item{verbose}{Logical: print output diagnostics?}
 
-\item{alpha}{Backtracking line search parameter: acceptance of a decrease in function value by ALPHA*f of the prediction
-based on the linear extrapolation.}
-
-\item{beta}{Backtracking line search reduction factor. 0.1 corresponds to a very crude search, 0.8 corresponds
-to a less crude search.}
-
-\item{backeps}{Backtrack threshold: the search can miss by this much. Consider setting it to 1e-10
-if backtracking seems to be failing due to round-off.}
+\item{...}{Named extra arguments passed to the selected back-end (e.g. \code{order},
+\code{itermax}, \code{lambda.init}, \code{vt}, \code{trunc.to}, \code{boundary.tolerance}, ...).}
 }
 \value{
-A list with the following values:
-\describe{
-    \item{logelr}{Log of empirical likelihood ratio (equal to 0 if the hypothesised mean is equal to the sample mean)}
-    \item{lam}{Vector of Lagrange multipliers}
-    \item{wts}{Observation weights/probabilities (vector of length n)}
-    \item{converged}{\code{TRUE} if algorithm converged. \code{FALSE} usually means that mu is not in the convex hull of the data. Then, a very small likelihood is returned (instead of zero).}
-    \item{iter}{Number of iterations taken.}
-    \item{ndec}{Newton decrement (see Boyd & Vandenberghe).}
-    \item{gradnorm}{Norm of the gradient of log empirical likelihood.}
-}
+A list with either the return value of the selected back-end  or (for extrapolation
+  methods) at least the \code{logelr} list value and extrapolation attributes.
 }
 \description{
-Implements the empirical-likelihood-ratio test for the mean of the coordinates of \code{z}
-(with the hypothesised value \code{mu}). The counts need not be integer;
-in the context of local likelihoods, they can be kernel observation weights.
-}
-\details{
-Negative weights are not allowed. They could be useful in some applications, but they can destroy
-convexity or even boundedness. They also make the Newton step fail to be of least squares type.
-
-This function relies on the improved computational strategy for the empirical likelihood.
-The search of the lambda multipliers is carried out via a dampened Newton method with guaranteed
-convergence owing to the fact that the log-likelihood is replaced by its Taylor approximation
-of any desired order (default: 4, the minimum value that ensures self-concordance).
-
-Tweak \code{alpha} and \code{beta} with extreme caution. See \insertCite{boyd2004convex}{smoothemplik},
-pp. 464--466 for details. It is necessary that \code{0 < alpha < 1/2} and \code{0 < beta < 1}.
-\code{alpha = 0.3} seems better than 0.01 on some 2-dimensional test data (sometimes fewer iterations).
-
-The argument names, except for \code{lambda.init}, are matching the original names in Art B. Owen's implementation.
-The highly optimised one-dimensional counterpart, \code{EL0}, is designed to return a faster
-and a more accurate solution in the one-dimensional case.
+Call \code{EL0()}, \code{EL1()}, or \code{EuL()} through a single interface.
+If extrapolation is requested, switch to dedicated functions.
+Anything method-specific goes into \code{EL.args}.
 }
 \examples{
-earth <- c(
-  5.5, 5.61, 4.88, 5.07, 5.26, 5.55, 5.36, 5.29, 5.58, 5.65, 5.57, 5.53, 5.62, 5.29,
-  5.44, 5.34, 5.79, 5.1, 5.27, 5.39, 5.42, 5.47, 5.63, 5.34, 5.46, 5.3, 5.75, 5.68, 5.85
-)
-EL(earth, mu = 5.517, verbose = TRUE) # 5.517 is the modern accepted value
+# EL0 with extras:
+EL(type = "EL0", z = 1:9, mu = 4, boundary.tolerance = 1e-8)
+# EL1 with a custom order and iteration cap:
+set.seed(1)
+x <- cbind(rnorm(30), runif(30)-0.5)
+EL(type = "EL1", z = x, mu = c(0, 0), order = 4, itermax = 50, return.weights = TRUE)
+# EuL with vt and truncation:
+set.seed(1)
+EL(type = "EuL", z = x, vt = runif(NROW(x)), weight.tolerance = 0.1, trunc.to = 0.1)
 
-# Linear regression through empirical likelihood
-coef.lm <- coef(lm(mpg ~ hp + am, data = mtcars))
-xmat <- cbind(1, as.matrix(mtcars[, c("hp", "am")]))
-yvec <- mtcars$mpg
-foc.lm <- function(par, x, y) {  # The sample average of this
-  resid <- y - drop(x \%*\% par)   # must be 0
-  resid * x
-}
-minusEL <- function(par) -EL(foc.lm(par, xmat, yvec), itermax = 10)$logelr
-coef.el <- optim(c(mean(yvec), 0, 0), minusEL)$par
-abs(coef.el - coef.lm) / coef.lm  # Relative difference
+# Extrapolated variants
+set.seed(1)
+EL(type = "EL0", z = 1:9, mu = 12, chull.fail = "taylor", exel.control = list(xlim = c(2, 8)))
+EL(type = "EL1", z = 1:9, mu = 12, chull.fail = "wald", exel.control = list(fmax = 10))
+x <- matrix(runif(20), ncol = 2)
+EL(x, mu = c(0, 0), chull.fail = "adjusted")
+EL(x, mu = c(0, 0), chull.fail = "adjusted2")
+EL(x, mu = c(0, 0), chull.fail = "balanced")
 
-# Likelihood ratio testing without any variance estimation
-# Define the profile empirical likelihood for the coefficient on am
-minusPEL <- function(par.free, par.am)
-  -EL(foc.lm(c(par.free, par.am), xmat, yvec), itermax = 20)$logelr
-# Constrained maximisation assuming that the coef on par.am is 3.14
-coef.el.constr <- optim(coef.el[1:2], minusPEL, par.am = 3.14)$par
-print(-2 * EL(foc.lm(c(coef.el.constr, 3.14), xmat, yvec))$logelr)
-# Exceeds the critical value qchisq(0.95, df = 1)
 }
 \references{
 \insertAllCited{}
-}
-\seealso{
-[logTaylor()], [EL0()]
 }

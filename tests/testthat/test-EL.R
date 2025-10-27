@@ -1,16 +1,21 @@
-test_that("EL and EL0 are almost identical, but platform-dependent", {
-  earth <- c(5.5, 5.61, 4.88, 5.07, 5.26, 5.55, 5.36, 5.29, 5.58, 5.65, 5.57, 5.53, 5.62, 5.29,
-             5.44, 5.34, 5.79, 5.1, 5.27, 5.39, 5.42, 5.47, 5.63, 5.34, 5.46, 5.3, 5.75, 5.68, 5.85)
-  out1 <- EL(earth, mu = 5.517, return.weights = TRUE)
-  out2 <- EL0(earth, mu = 5.517, return.weights = TRUE)
-  expect_true(setequal(intersect(names(out1), names(out2)), c("logelr", "lam", "wts", "exitcode", "iter")))
+test_that("Balanced EL preserves the sample mean", {
+  x <- cbind(1:5, c(4, 7, 3, 9, 1))
+  a <- EL(x, mu = c(0, 0), chull.fail = "balanced")
+  x1 <- attr(a, "point1")
+  x2 <- attr(a, "point2")
+  expect_equal(colMeans(x), colMeans(rbind(x, x1, x2)), tolerance = 1e-12)
+})
 
+test_that("Adjusted2 EL is less aggressive than Adjusted", {
+  x <- cbind(1:5, c(4, 7, 3, 9, 1))
+  el1 <- EL(x, mu = c(0, 0), chull.fail = "adjusted")
+  el2 <- suppressWarnings(EL(x, mu = c(0, 0), chull.fail = "adjusted2"))
+  expect_gt(sum(attr(el1, "point1")^2), sum(attr(el2, "point1")^2))
+})
 
-  # This is the platform-dependent part
-  diff.lam <- max(abs(out1$lam - out2$lam))
-  diff.wts <- max(abs(out1$wts - out2$wts))
-  # Actually, these differences could be 0
-  # https://github.com/Fifis/smoothemplik/actions/runs/9457471399/job/26051339706
-  expect_lt(diff.lam, 5e-10)
-  expect_lt(diff.wts, 5e-10)
+test_that("ExEL can be invoked correctly from EL", {
+  x <- cbind(1:5, c(4, 7, 3, 9, 1))
+  el1 <- EL(x, mu = c(0, 0), chull.fail = "taylor")
+  el2 <- EL(x, mu = c(0, 0), chull.fail = "wald")
+  expect_gt(el2$logelr, el1$logelr)  # Taylor penalises more strongly
 })
