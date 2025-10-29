@@ -42,7 +42,7 @@ test_that("Errors are caught in ExEL1", {
   expect_error(ExEL1(X, mu = matrix(0, ncol = 1)), "mu must have d")
   expect_lt(ExEL1(X, mu = matrix(0, ncol = 3)), 0)
   Xbar <- colMeans(X)
-  expect_identical(ExEL1(X, mu = Xbar), 0)
+  expect_equal(ExEL1(X, mu = Xbar), 0, tolerance = 1e-12)  # Actually should be around MachEps
 })
 
 test_that("The cut-off size depends on the sample size in 1D ExEL", {

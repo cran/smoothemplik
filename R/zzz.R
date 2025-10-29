@@ -3,5 +3,5 @@
 #' @importFrom Rdpack reprompt
 
 .onAttach <- function(libname, pkgname) {
-  packageStartupMessage("Smoothed Empirical Likelihood version 0.0.16 (2025-10-27).\nPackage under active development; core functions subject to change.")
+  packageStartupMessage("Smoothed Empirical Likelihood version 0.0.17 (2025-10-28).\nPackage under active development; core functions subject to change.")
 }

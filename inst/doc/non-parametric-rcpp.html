@@ -374,7 +374,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 estimation in R</h1>
 <h4 class="author">Andreï V. Kostyrka, University of Luxembourg</h4>
 <h4 class="date">Created: 2023-12-05, last modified: 2024-01-15,
-compiled: 2025-10-27</h4>
+compiled: 2025-10-28</h4>
 <div class="abstract">
 <p class="abstract">Abstract</p>
 This vignette demonstrates how to carry out non-parametric density and
@@ -600,7 +600,7 @@ grid.</p>
 <span id="cb6-5"><a href="#cb6-5" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fl">0.5</span></span></code></pre></div>
 <p>Now, we compare the pure R and Rcpp functions:</p>
 <div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb7-1"><a href="#cb7-1" tabindex="-1"></a>wCPP <span class="ot">&lt;-</span> <span class="fu">clock</span>(<span class="fu">kernelWeights</span>(X, <span class="at">xout =</span> xg, <span class="at">bw =</span> b))</span>
-<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 5.0 [5.0+-] ms</span></span>
+<span id="cb7-2"><a href="#cb7-2" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 4.0 [4.0+-] ms</span></span>
 <span id="cb7-3"><a href="#cb7-3" tabindex="-1"></a>wR   <span class="ot">&lt;-</span> <span class="fu">clock</span>(<span class="fu">kernelWeightsR</span>(X, <span class="at">xout =</span> xg, <span class="at">bw =</span> b))</span>
 <span id="cb7-4"><a href="#cb7-4" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 4.0 [4.0+-] ms</span></span>
 <span id="cb7-5"><a href="#cb7-5" tabindex="-1"></a></span>
@@ -616,7 +616,7 @@ grid.</p>
 <p>Note that there are tiny discrepancies related to the order of
 operations and finite machine precision:</p>
 <div class="sourceCode" id="cb8"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" tabindex="-1"></a><span class="fu">all.equal</span>(wR, wCPP, <span class="at">tolerance =</span> <span class="fl">1e-16</span>)</span>
-<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Attributes: &lt; Component \&quot;time\&quot;: Mean relative difference: 0.25 &gt;&quot;</span></span>
+<span id="cb8-2"><a href="#cb8-2" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Attributes: &lt; Component \&quot;time\&quot;: Mean relative difference: 2.220446e-13 &gt;&quot;</span></span>
 <span id="cb8-3"><a href="#cb8-3" tabindex="-1"></a><span class="co">#&gt; [2] &quot;Mean relative difference: 1.725457e-10&quot;</span></span>
 <span id="cb8-4"><a href="#cb8-4" tabindex="-1"></a><span class="fu">all.equal</span>(fR, fCPP, <span class="at">tolerance =</span> <span class="fl">1e-16</span>)</span>
 <span id="cb8-5"><a href="#cb8-5" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Attributes: &lt; Names: 1 string mismatch &gt;&quot;                         </span></span>
@@ -668,11 +668,11 @@ except for the default Gaussian, have finite support on <span class="math inline
 <span id="cb11-10"><a href="#cb11-10" tabindex="-1"></a><span class="fu">colnames</span>(timings) <span class="ot">&lt;-</span> <span class="fu">paste0</span>(<span class="st">&quot;n=&quot;</span>, ns)</span>
 <span id="cb11-11"><a href="#cb11-11" tabindex="-1"></a><span class="fu">print</span>(timings, <span class="dv">2</span>)</span>
 <span id="cb11-12"><a href="#cb11-12" tabindex="-1"></a><span class="co">#&gt;            n=500 n=1000 n=2000</span></span>
-<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; R.median       0      0      0</span></span>
-<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; R.mean         0      0      0</span></span>
+<span id="cb11-13"><a href="#cb11-13" tabindex="-1"></a><span class="co">#&gt; R.median       0      0      1</span></span>
+<span id="cb11-14"><a href="#cb11-14" tabindex="-1"></a><span class="co">#&gt; R.mean         0      0      1</span></span>
 <span id="cb11-15"><a href="#cb11-15" tabindex="-1"></a><span class="co">#&gt; R.sd          NA     NA     NA</span></span>
-<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; CPP.median     0      0      1</span></span>
-<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; CPP.mean       0      0      1</span></span>
+<span id="cb11-16"><a href="#cb11-16" tabindex="-1"></a><span class="co">#&gt; CPP.median     0      0      0</span></span>
+<span id="cb11-17"><a href="#cb11-17" tabindex="-1"></a><span class="co">#&gt; CPP.mean       0      0      0</span></span>
 <span id="cb11-18"><a href="#cb11-18" tabindex="-1"></a><span class="co">#&gt; CPP.sd        NA     NA     NA</span></span></code></pre></div>
 </div>
 <div id="multivariate-kernel-estimation" class="section level2" number="3">
@@ -696,12 +696,11 @@ regression function.</p>
 <span id="cb12-8"><a href="#cb12-8" tabindex="-1"></a>b <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="fl">0.7</span>, <span class="fl">0.8</span>)</span>
 <span id="cb12-9"><a href="#cb12-9" tabindex="-1"></a></span>
 <span id="cb12-10"><a href="#cb12-10" tabindex="-1"></a>wCPP <span class="ot">&lt;-</span> <span class="fu">clock</span>(<span class="fu">kernelWeights</span>(X, <span class="at">xout =</span> xg, <span class="at">bw =</span> b), <span class="at">n =</span> <span class="dv">10</span>)</span>
-<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 5.0 [5.0+-] ms</span></span>
+<span id="cb12-11"><a href="#cb12-11" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 11.0 [11.0+-] ms</span></span>
 <span id="cb12-12"><a href="#cb12-12" tabindex="-1"></a>wR <span class="ot">&lt;-</span> <span class="fu">clock</span>(<span class="fu">kernelWeightsR</span>(X, <span class="at">xout =</span> xg, <span class="at">bw =</span> b), <span class="at">n =</span> <span class="dv">10</span>)</span>
-<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 6.0 [6.0+-] ms</span></span>
+<span id="cb12-13"><a href="#cb12-13" tabindex="-1"></a><span class="co">#&gt; Median [mean +- SD] time per evaluation: 11.0 [11.0+-] ms</span></span>
 <span id="cb12-14"><a href="#cb12-14" tabindex="-1"></a><span class="fu">all.equal</span>(wR, wCPP, <span class="at">tolerance =</span> <span class="fl">1e-16</span>)</span>
-<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Attributes: &lt; Component \&quot;time\&quot;: Mean relative difference: 0.1666667 &gt;&quot;</span></span>
-<span id="cb12-16"><a href="#cb12-16" tabindex="-1"></a><span class="co">#&gt; [2] &quot;Mean relative difference: 1.066705e-15&quot;</span></span></code></pre></div>
+<span id="cb12-15"><a href="#cb12-15" tabindex="-1"></a><span class="co">#&gt; [1] &quot;Mean relative difference: 1.066705e-15&quot;</span></span></code></pre></div>
 <p>C++ is roughly 4 times faster. In terms of accuracy, the difference
 is minuscule:</p>
 <div class="sourceCode" id="cb13"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a>max.dw <span class="ot">&lt;-</span> <span class="fu">apply</span>(wR <span class="sc">-</span> wCPP, <span class="dv">1</span>, <span class="cf">function</span>(x) <span class="fu">max</span>(<span class="fu">abs</span>(x), <span class="at">na.rm =</span> <span class="cn">TRUE</span>))</span>
@@ -750,10 +749,10 @@ CPU overhead is negligible:</p>
 <span id="cb16-13"><a href="#cb16-13" tabindex="-1"></a>timings <span class="ot">&lt;-</span> <span class="fu">cbind</span>(nd, timings)</span>
 <span id="cb16-14"><a href="#cb16-14" tabindex="-1"></a><span class="fu">print</span>(timings, <span class="dv">2</span>)</span>
 <span id="cb16-15"><a href="#cb16-15" tabindex="-1"></a><span class="co">#&gt;     n dim R.elapsed CPP.elapsed</span></span>
-<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; 1 125   2     0.002       0.003</span></span>
-<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; 2 500   2     0.038       0.011</span></span>
-<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; 3 125   6     0.022       0.007</span></span>
-<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; 4 500   6     0.757       0.097</span></span></code></pre></div>
+<span id="cb16-16"><a href="#cb16-16" tabindex="-1"></a><span class="co">#&gt; 1 125   2     0.003       0.003</span></span>
+<span id="cb16-17"><a href="#cb16-17" tabindex="-1"></a><span class="co">#&gt; 2 500   2     0.043       0.013</span></span>
+<span id="cb16-18"><a href="#cb16-18" tabindex="-1"></a><span class="co">#&gt; 3 125   6     0.024       0.009</span></span>
+<span id="cb16-19"><a href="#cb16-19" tabindex="-1"></a><span class="co">#&gt; 4 500   6     0.800       0.103</span></span></code></pre></div>
 <p>Finally, we can visualise the kernel regression estimator with
 various kernels and degrees, and robustness operations (described in
 <span class="citation">Cleveland (1979)</span>). Since the true

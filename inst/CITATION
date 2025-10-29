@@ -5,9 +5,9 @@ bibentry(
   title = "smoothemplik: Smoothed Empirical Likelihood for efficient estimation and specification testing",
   author = person(given=c("Andreï", "Victorovitch"), family="Kostyrka", role = c("aut", "cre"), email = "andrei.kostyrka@gmail.com"),
   year = "2025",
-  note = "R package version 0.0.16",
+  note = "R package version 0.0.17",
   organization = "University of Luxembourg",
-  textVersion = "Kostyrka, Andreï V. (2025). smoothemplik: Smoothed Empirikal Likelihood for efficient estimation and specification testing. R package version 0.0.16. https://github.com/Fifis/smoothemplik",
+  textVersion = "Kostyrka, Andreï V. (2025). smoothemplik: Smoothed Empirikal Likelihood for efficient estimation and specification testing. R package version 0.0.17. https://github.com/Fifis/smoothemplik",
   url = "https://github.com/Fifis/smoothemplik"
 )
 
@@ -17,8 +17,19 @@ bibentry(
   author = person(given=c("Andreï", "Victorovitch"), family="Kostyrka", role = c("aut", "cre"), email = "andrei.kostyrka@gmail.com"),
   year = "2025",
   organization = "University of Luxembourg",
-  note = "Vignette for the R package smoothemplik 0.0.16.",
-  textVersion = "Kostyrka, Andreï V. (2025). Using Rcpp to speed up non-parametric estimation in R. Vignette for the R package smoothemplik 0.0.16.",
+  note = "Vignette for the R package smoothemplik 0.0.17.",
+  textVersion = "Kostyrka, Andreï V. (2025). Using Rcpp to speed up non-parametric estimation in R. Vignette for the R package smoothemplik 0.0.17.",
+  url = "https://github.com/Fifis/smoothemplik/tree/main/vignettes"
+)
+
+bibentry(
+  bibtype="Misc",
+  title = "Choosing weights for likelihood smoothing",
+  author = person(given=c("Andreï", "Victorovitch"), family="Kostyrka", role = c("aut", "cre"), email = "andrei.kostyrka@gmail.com"),
+  year = "2025",
+  organization = "University of Luxembourg",
+  note = "Vignette for the R package smoothemplik 0.0.17.",
+  textVersion = "Kostyrka, Andreï V. (2025). Choosing weights for likelihood smoothing. Vignette for the R package smoothemplik 0.0.17.",
   url = "https://github.com/Fifis/smoothemplik/tree/main/vignettes"
 )
 

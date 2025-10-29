@@ -30,7 +30,7 @@ test_that("Errors are caught in ExEL2", {
   expect_error(ExEL2(X, mu = matrix(0, ncol = 1)), "mu must have d")
   expect_lt(ExEL2(X, mu = matrix(0, ncol = 3)), 0)
   Xbar <- colMeans(X)
-  expect_identical(ExEL2(X, mu = Xbar), 0)
+  expect_equal(ExEL2(X, mu = Xbar), 0, tolerance = 1e-12)  # Actually should be around MachEps
 })
 
 test_that("Near-degenerate data sets are handled", {

@@ -41,6 +41,10 @@ These bug fixes and features are scheduled for the upcoming releases.
 - DEV: Add tests reproducing simple hard-coded examples
 - DEV: Check the release with `todor::todor_package()`, `lintr::lint_package()`, `R CMD check --as-cran`, and `goodpractice::gp()`
 
+# smoothemplik 0.0.17 (2025-10-28)
+
+- Fixed failing equality tests for Macs (due to inferior accuracy)
+
 # smoothemplik 0.0.16 (2025-10-27)
 
 - Defined `EL0()` as the univariate and `EL1()` as the multi-variate wrapper, subsumed by `EL()`
